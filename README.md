@@ -6,6 +6,7 @@
 实例：
 <pre>
 
+	<input type="text" id="date" readonly class="date-input">
 	/**
 	 * 创建日期选择组件实例
 	 * @param  'date' // data为输入框的id值
