@@ -5,6 +5,13 @@
 
 实例：
 <pre>
+
+	/**
+	 * 创建日期选择组件实例
+	 * @param  'date' // data为输入框的id值
+	 * this.currDate // 获取当前返回的日期数组 [2014, 7, 7]
+	 * this.getCurrentDate(0,0,0) // 获取指定的日期，如果参数为0，则返回当前对应的值
+	 */
 	var appDateField = new APPDateField('date', {
 
 	    isCN: true,       //是否显示中文, 如: " 2014年4月1日 "

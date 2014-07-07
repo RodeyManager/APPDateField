@@ -40,11 +40,11 @@
     'use strict';
 
 
-    var rAF = window.requestAnimationFrame	||
-        window.webkitRequestAnimationFrame	||
-        window.mozRequestAnimationFrame		||
-        window.oRequestAnimationFrame		||
-        window.msRequestAnimationFrame		||
+    var rAF = window.requestAnimationFrame  ||
+        window.webkitRequestAnimationFrame  ||
+        window.mozRequestAnimationFrame     ||
+        window.oRequestAnimationFrame       ||
+        window.msRequestAnimationFrame      ||
         function (callback) { window.setTimeout(callback, 1000 / 60); };
 
 
@@ -102,7 +102,7 @@
         //默认日期，从焦点对象中取值
         self.valList = [];
         //最后输出日期 (默认的， 你还可以使用对象的 getCurrentDate 方法获取，同时还可以在该方法的参数中设置 year, month, date)
-        self.currDate = [];
+        self.currDate = {};
 
         //组件相关元素
         self.app_top;
@@ -487,7 +487,7 @@
      * @returns {string}
      */
     APPDateField.prototype.getCurrentDate = function(y, m, d, commer){
-        var list = this.currDate;
+        var list = this.currDate.currDate;
         (!y || y == undefined || y == null || y == 0) ? y = list[0] : y;
         (!m || m == undefined || m == null || m == 0) ? m = list[1] : m;
         (!d || d == undefined || d == null || d == 0) ? d = list[2] : d;
@@ -508,7 +508,7 @@
     APPDateField.prototype._scrollTop = function(elObj, y, flag){
        var flag = !flag ? flag : true;
         if(flag){
-            elObj.animate({'top': y}, 500, function(){
+            elObj.stop().animate({'top': y}, 500, function(){
                 var mesc = y % 50;
                 //console.log(mesc)
                 if(mesc != 0){
@@ -567,7 +567,16 @@
         vlist.push(this.getMonth());
         vlist.push(this.getDate());
 
-        this.currDate = vlist;
+        var dateStr = this.getYear() + '年' + this.getMonth() + '月' + this.getDate() + '日';
+        var dateStrFM = vlist.join(this.opts.commer);
+
+        var currObj = {
+            currDate: vlist,
+            dateStr: dateStr,
+            dateStrFM: dateStrFM
+        };
+
+        this.currDate = currObj;
         //console.log(this.currDate)
 
         this.setCurrentTXT(vlist);
@@ -770,7 +779,7 @@
                 //el.style.webkitTransformOriginY = y + 'px';
             }else{
                 //$(el).stop().animate({ 'webkitTransform': 'translate(0px, '+ y +'px, 0px)' }, 10, function(){
-                $(el).animate({ top: y }, 10, function(){
+                $(el).stop().animate({ top: y }, 10, function(){
                     var mesc = y % 50;
                     //console.log(mesc)
                     if(mesc != 0){
@@ -934,8 +943,6 @@
         }
 
     };
-
-    window.APPDateField = APPDateField;
 
 }).call(this);
 
