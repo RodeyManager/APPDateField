@@ -21,6 +21,10 @@
 	    cancel: function(evt){  // "取消"按钮触发事件
 	        console.log('Cancel---');
 	    }
-	    
+
 	});
 </pre>
+
+<div class="preview">
+	<img src="images/preview.png" height="1136" width="640" alt="">
+</div>
