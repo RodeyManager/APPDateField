@@ -18,6 +18,7 @@
  *
  * var appDateField = new APPDateField('date', {
                         isCN: true,       //是否显示中文, 如: " 2014年4月1日 ", 否： " 2014-04-01 "
+                        isListType: true, //日期列表中是否需要显示 ‘年月日’
                         commer: '/',      //期间之间的间隔符, 默认为 "/"，当 isCN为 true时, 这个设置失效
                         showYear: true,   //是否显示年份, 默认为显示 （true）
                         showMonth: true,  //是否显示月份, 默认为显示 （true）
@@ -40,24 +41,25 @@
     'use strict';
 
 
-    var rAF = window.requestAnimationFrame  ||
-        window.webkitRequestAnimationFrame  ||
-        window.mozRequestAnimationFrame     ||
-        window.oRequestAnimationFrame       ||
-        window.msRequestAnimationFrame      ||
+    var rAF = window.requestAnimationFrame	||
+        window.webkitRequestAnimationFrame	||
+        window.mozRequestAnimationFrame		||
+        window.oRequestAnimationFrame		||
+        window.msRequestAnimationFrame		||
         function (callback) { window.setTimeout(callback, 1000 / 60); };
 
 
     var root = this;
     var ddCache = [];
     var gVars = {
-        fontSize: 32,
-        step: 50,
+        fontSize: 22,
+        step: 40,
         isCircle: false,
         //模板
         tpl: '<div class="app-dateField-main">'+
                 '<div class="app-dateField-top">'+
                     '<span class="app-dateField-btnCancel">取消</span>'+
+                    '<span class="app-dateField-title">选择时间</span>'+
                     '<span class="app-dateField-btnOk">完成</span>'+
                 '</div>'+
                 '<div class="app-dateField-center">'+
@@ -78,7 +80,8 @@
     var APPDateField = function(selectElm, options, complate, cancel){
         var self = this;
         var options = options || {};
-        self.selectElm = $ ? $('#' + selectElm)[0] : document.getElementById(selectElm);
+        //self.selectElm = $ ? $('#' + selectElm)[0] : document.getElementById(selectElm);
+        self.selectElm = selectElm;
         self.htmlDom = null;
         self.appWrap = $ ? $('#APPDateField-con')[0] : document.getElementById('APPDateField-con');
 
@@ -102,7 +105,7 @@
         //默认日期，从焦点对象中取值
         self.valList = [];
         //最后输出日期 (默认的， 你还可以使用对象的 getCurrentDate 方法获取，同时还可以在该方法的参数中设置 year, month, date)
-        self.currDate = {};
+        self.currDate = [];
 
         //组件相关元素
         self.app_top;
@@ -128,6 +131,7 @@
             downYear: options.downYear || 100,
 
             isCN: (!options.isCN && undefined != options.isCN) ? options.isCN : true,
+            isListType: (!options.isListType && undefined != options.isListType) ? options.isCN : true,
             isVal: (!options.isVal && undefined != options.isVal) ? options.isVal : false, //是否是value值还是innerText
             isCircle: (!options.isCircle && undefined != options.isCircle) ? options.isCircle : false, //是否设置凸镜效果
             showYear: (!options.showYear && undefined != options.showYear) ? options.showYear : true,
@@ -146,9 +150,14 @@
 
     APPDateField.prototype._init = function(){
         var self = this;
-
-        if(self.selectElm.value || self.selectElm.value !== ''){
-            self.valList = self.subDefaultDate(self.selectElm.value || '');
+        var value = '';
+        if(self.selectElm.tagName == 'INPUT'){
+            value = self.selectElm.value;
+        }else{
+            value = self.selectElm.innerHTML;
+        }
+        if(value || value !== ''){
+            self.valList = self.subDefaultDate(value || '');
         }
         self.setCurrentTXT(self.valList);
 
@@ -266,11 +275,11 @@
         var style = '';
         if(self.loaded){
             for(var j = 1; j < up + 1; j++){
-                li = self.opts.isCN ? '<li'+ style +'>'+ (ny - j) +'年</li>' : '<li>'+ (ny - j) +'</li>';
+                li = self.opts.isListType ? '<li'+ style +'>'+ (ny - j) +'年</li>' : '<li>'+ (ny - j) +'</li>';
                 html.unshift(li);
             }
             for(var i = 0; i <= down; i++){
-                li = self.opts.isCN ? '<li'+ style +'>'+ (ny + i) +'年</li>' : '<li>'+ self.dateFm((ny + i)) +'</li>';
+                li = self.opts.isListType ? '<li'+ style +'>'+ (ny + i) +'年</li>' : '<li>'+ self.dateFm((ny + i)) +'</li>';
                 html.push(li);
             }
             self.app_y_con.html(html.join(''));
@@ -294,13 +303,13 @@
         var li = '';
         if(self.loaded){
             while(m < 13){
-                li = self.opts.isCN ? '<li>'+ m +'月</li>' : '<li>'+ self.dateFm(m) +'</li>';
+                li = self.opts.isListType ? '<li>'+ m +'月</li>' : '<li>'+ self.dateFm(m) +'</li>';
                 html.push(li);
                 m++;
             }
             self.app_m_con.html(html.join(''));
         }
-        self._scrollTop(self.app_m_con, -(50 * parseInt(self.opts.month) - 200), true);
+        self._scrollTop(self.app_m_con, -(self.step * parseInt(self.opts.month) - (self.step * 4)), true);
     };
 
     /**
@@ -323,16 +332,16 @@
                 pr = (((self.opts.year % 4 == 0 ) && (self.opts.year % 100 != 0)) || (self.opts.year % 400 == 0 )) ? 29 : 28;
                 while(d < 31){
                     if(d >= pr){
-                        li = self.opts.isCN ? '<li style="display:none;">'+ (d + 1) +'日</li>' : '<li style="display:none;">'+ self.dateFm((d + 1)) +'</li>';
+                        li = self.opts.isListType ? '<li style="display:none;">'+ (d + 1) +'日</li>' : '<li style="display:none;">'+ self.dateFm((d + 1)) +'</li>';
                     }else{
-                        li = self.opts.isCN ? '<li>'+ (d + 1) +'日</li>' : '<li>'+ self.dateFm((d + 1)) +'</li>';
+                        li = self.opts.isListType ? '<li>'+ (d + 1) +'日</li>' : '<li>'+ self.dateFm((d + 1)) +'</li>';
                     }
                     html.push(li);
                     d++;
                 }
             }else{
                 while(d < 31){
-                    li = self.opts.isCN ? '<li>'+ (d + 1) +'日</li>' : '<li>'+ self.dateFm((d + 1)) +'</li>';
+                    li = self.opts.isListType ? '<li>'+ (d + 1) +'日</li>' : '<li>'+ self.dateFm((d + 1)) +'</li>';
                     html.push(li);
                     d++;
                 }
@@ -340,7 +349,7 @@
             self.app_d_con.html(html.join(''));
         }
         //var trh =  (parseInt(self.opts.date) * 50) <= 200 ? ''+ (200 - parseInt(self.opts.date) * 50) : ''+ (parseInt(self.opts.date) * 50 - 200);
-        self._scrollTop(self.app_d_con, -(50 * parseInt(self.opts.date) - 200), true);
+        self._scrollTop(self.app_d_con, -(self.step * parseInt(self.opts.date) - (self.step * 4)), true);
 
         //console.log(self.valList)
 
@@ -409,25 +418,30 @@
 
         //console.log(vlist);
 
+        var dateStr;
         var dy = self.opts.isCN ? (self.opts.year + '年') : (self.opts.year + self.opts.commer),
             dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month) + self.opts.commer),
             dd = self.opts.isCN ? (self.opts.date + '日') : (self.dateFm(self.opts.date));
 
         if(self.opts.showYear && self.opts.showMonth && !self.opts.showDate){
             dy = self.opts.isCN ? (self.opts.year + '年') : (self.opts.year + self.opts.commer);
-            dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month) + self.opts.commer);
+            dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month));
             dd = '';
-            self.selectElm.value = dy + dm;
+            dateStr = dy + dm;
         }else if(!self.opts.showYear && self.opts.showMonth && self.opts.showDate){
             dy = '';
             dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month) + self.opts.commer);
             dd = self.opts.isCN ? (self.opts.date + '日') : (self.dateFm(self.opts.date));
-            self.selectElm.value = dm + dd;
+            dateStr = dm + dd;
         }else{
-            self.selectElm.value = dy + dm + dd;
+            dateStr = dy + dm + dd;
         }
 
-
+        if(self.selectElm.tagName == 'INPUT'){
+            self.selectElm.value = dateStr;
+        }else{
+            self.selectElm.innerHTML = dateStr;
+        }
 
 
         /*if(self.opts.isCN){
@@ -487,7 +501,7 @@
      * @returns {string}
      */
     APPDateField.prototype.getCurrentDate = function(y, m, d, commer){
-        var list = this.currDate.currDate;
+        var list = this.currDate;
         (!y || y == undefined || y == null || y == 0) ? y = list[0] : y;
         (!m || m == undefined || m == null || m == 0) ? m = list[1] : m;
         (!d || d == undefined || d == null || d == 0) ? d = list[2] : d;
@@ -509,10 +523,10 @@
        var flag = !flag ? flag : true;
         if(flag){
             elObj.stop().animate({'top': y}, 500, function(){
-                var mesc = y % 50;
+                var mesc = y % self.step;
                 //console.log(mesc)
                 if(mesc != 0){
-                    var top = 50 * Math.round(y / 50) - ( Math.abs(mesc) < 50 ? 0 : 50);
+                    var top = self.step * Math.round(y / self.step) - ( Math.abs(mesc) < self.step ? 0 : self.step);
                     $(this).animate({ top: top });
                 }
             });
@@ -567,18 +581,9 @@
         vlist.push(this.getMonth());
         vlist.push(this.getDate());
 
-        var dateStr = this.getYear() + '年' + this.getMonth() + '月' + this.getDate() + '日';
-        var dateStrFM = vlist.join(this.opts.commer);
-
-        var currObj = {
-            currDate: vlist,
-            dateStr: dateStr,
-            dateStrFM: dateStrFM
-        };
-
-        this.currDate = currObj;
+        this.currDate = vlist;
         //console.log(this.currDate)
-
+        //负值给选择框
         this.setCurrentTXT(vlist);
 
         this.appWrap.style.display = 'none';
@@ -591,7 +596,6 @@
      */
     APPDateField.prototype._cancel = function(evt){
         this.appWrap.style.display = 'none';
-        this.cancel.call(this, evt);
     };
     /**
      * 日期格式化
@@ -715,7 +719,7 @@
         _move: function(evt, parentE){
             if(this.isTouchStart){
                 var target = $(evt.target).parent('ul');
-                target.find('li').css('fontSize', this.fontSize);
+                target.find('li').css('fontSize', this.fontSize + 'px');
                 this.dy = this.y - (this.moveY - evt.pageY);
 
                 var top = this._formateTop(this.dy);
@@ -739,6 +743,7 @@
             }
 
             var top = this._formateTop(curTop);
+            //console.log(curTop)
             this._scrollTop(target[0], top, false);
 
             //设置凸镜效果
@@ -751,10 +756,10 @@
          * @private
          */
         _formateTop: function(top){
-            if(top >= 150){
-                top = 150;
-            }else if(Math.abs(top) >= this.h - 200){
-                top = -(this.h - 200);
+            if(top >= (gVars.step * 3)){
+                top = (gVars.step * 3);
+            }else if(Math.abs(top) >= this.h - (gVars.step * 4)){
+                top = -(this.h - (gVars.step * 4));
             }else{
                 return top;
             }
@@ -775,16 +780,12 @@
             var self = this;
             if(flag){
                 el.style.top = y + 'px';
-                //el.style.webkitTransform = 'translate(0px, '+ y +'px, 0px)';
-                //el.style.webkitTransformOriginY = y + 'px';
             }else{
-                //$(el).stop().animate({ 'webkitTransform': 'translate(0px, '+ y +'px, 0px)' }, 10, function(){
                 $(el).stop().animate({ top: y }, 10, function(){
-                    var mesc = y % 50;
+                    var mesc = y % gVars.step;
                     //console.log(mesc)
                     if(mesc != 0){
-                        var top = 50 * Math.round(y / 50) - ( Math.abs(mesc) < 50 ? 0 : 50);
-                        //$(this).animate({ 'webkitTransform': 'translate(0px, '+ top +'px, 0px)' });
+                        var top = gVars.step * Math.round(y / gVars.step) - ( Math.abs(mesc) < gVars.step ? 0 : gVars.step);
                         $(this).animate({ top: top });
                         self.y = top;
                     }
@@ -794,7 +795,7 @@
 
             /////获取滚动end后的焦点值==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-START
             if(!self.isTouchStart){
-                var num = supperNumber(Math.round($(el).position().top / 50));
+                var num = supperNumber(Math.round($(el).position().top / gVars.step));
                 /*if(num == 0){
                     num = 3;
                 }else if(num >=1 && num <= 3){
@@ -807,17 +808,17 @@
                 var txt = $(el).find('li').eq(num).text();
                 if($(el).hasClass('app-dateField-month-con')){
                     self.vlist.month = parseInt(txt);
-                    var ynum = supperNumber(Math.round($('.app-dateField-year-con').position().top / 50));
+                    var ynum = supperNumber(Math.round($('.app-dateField-year-con').position().top / gVars.step));
                     self.vlist.year = parseInt($('.app-dateField-year-con').find('li').eq(ynum).text());
                 }else if($(el).hasClass('app-dateField-year-con')){
                     self.vlist.year = parseInt(txt);
-                    var ynum = supperNumber(Math.round($('.app-dateField-month-con').position().top / 50));
+                    var ynum = supperNumber(Math.round($('.app-dateField-month-con').position().top / gVars.step));
                     self.vlist.month = parseInt($('.app-dateField-month-con').find('li').eq(ynum).text());
                 }else{
                     self.vlist.date = parseInt(txt);
-                    var ynum = supperNumber(Math.round($('.app-dateField-year-con').position().top / 50));
+                    var ynum = supperNumber(Math.round($('.app-dateField-year-con').position().top / gVars.step));
                     self.vlist.year = parseInt($('.app-dateField-year-con').find('li').eq(ynum).text());
-                    var mnum = supperNumber(Math.round($('.app-dateField-month-con').position().top / 50));
+                    var mnum = supperNumber(Math.round($('.app-dateField-month-con').position().top / gVars.step));
                     self.vlist.month = parseInt($('.app-dateField-month-con').find('li').eq(mnum).text());
                 }
 
@@ -893,8 +894,8 @@
      */
     var zoomOBJ = function(elObj, y){
         //设置凸镜效果
-        var index = Math.round(y / 50);   //当前eq
-        var count = Math.round(elObj.height() / 50);  //总共的eq
+        var index = Math.round(y / gVars.step);   //当前eq
+        var count = Math.round(elObj.height() / gVars.step);  //总共的eq
         var dd = gVars.fontSize;
         //var somer = "  ";
         //确定位置
@@ -912,18 +913,17 @@
             index = Math.abs(index) + 3;
         }
 
+        //console.log(self.step)
+
         //循环缩放 上
         for(var i = 0; i < 4; i++){
             var li = elObj.find('li').eq(index - i);
             if(li[0]){
                 li[0].style.fontSize = dd + 'px';
-                //li.stop().css({ 'font-size': dd }, 1);
-                //li[0].innerText = somer + li[0].innerText;
             }else{
-                break;
+                continue;
             }
-            //somer = somer + "  ";
-            dd -= 5.0;
+            dd -= 3.0;
         }
         dd = gVars.fontSize;
 
@@ -933,13 +933,10 @@
             var li = elObj.find('li').eq(index + j);
             if(li[0]){
                 li[0].style.fontSize = dd + 'px';
-                //li.stop().css({ 'font-size': dd }, 1);
-                //li[0].innerText = somer + li[0].innerText;
             }else{
-                break;
+                continue;
             }
-            //somer = somer + "  ";
-            dd -= 5.0;
+            dd -= 3.0;
         }
 
     };
