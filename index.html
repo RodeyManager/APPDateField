@@ -2,20 +2,22 @@
 <html>
 <head>
     <title>移动web日期选择组件</title>
+    <meta charset="UTF-8" />
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8">
     <meta content="name" charset="Rodey">
-    <meta content="keyword" charset="反馈">
-    <meta content="descriptions" charset="天下通意见反馈管理">
+    <meta content="keyword" charset=" ">
+    <meta content="descriptions" charset=" ">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-status-bar-style" content="black-translucent">
-    <meta name="viewport" content="width=640,target-densitydpi=320,user-scalable=no"/>
-    <meta name="format-detection" content="telephone=no" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+    <meta name="format-detection" content="telephone=no"/>
+
     <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
     <div id="app">
 
-        <input type="text" id="date" readonly class="date-input">
+        <input type="text" id="date" readonly value="15时55分25秒" class="date-input">
         <button id="choiesDate" class="date-btn">选择日期</button>
         <!--日期选择组件模板-->
         <!--<div class="app-dateField-main">
@@ -49,11 +51,12 @@
 
         var choiesDate = function(evt){
             appDateField = new APPDateField('date', {
-                isCN: true,
-                commer: '/',
-                showYear: true,
-                showMonth: true,
-                showDate: true,
+                isCN: true,         //是否显示中文 如：“2014年8月22日”
+                commer: '/',        //日期之间的间隔符 , 默认为：“-”
+                showYear: true,     //是否显示年份
+                showMonth: true,    //是否显示月份
+                showDate: true,     //是否显示日
+                showTime: true,     //是否组件为时间选择，true：'16:20:25' 如果isCN为true，则："16时20分25秒".这个开启建议将isCN设置为false
                 complate: function(date){
                     console.log(this);
                     console.log(this.getCurrentDate(0, 0, 0));

@@ -20,6 +20,7 @@
 	    showYear: true,   //是否显示年份, 默认为显示 （true）
 	    showMonth: true,  //是否显示月份, 默认为显示 （true）
 	    showDate: true,   //是否显示日, 默认为显示 （true）
+	    showTime: true,     //是否组件为时间选择，true：'16:20:25' 如果isCN为true，则："16时20分25秒".这个开启建议将isCN设置为false
 	    complate: function(evt){  // "完成"按钮触发事件
 	        console.log(this)
 	        console.log(this.getCurrentDate(0,0,0));
@@ -35,4 +36,5 @@
 
 <div class="preview">
 	<img src="images/preview.png" height="1136" width="640" alt="">
+	<img src="images/preview2.png" height="1136" width="640" alt="">
 </div>

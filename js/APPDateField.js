@@ -23,6 +23,7 @@
                         showYear: true,   //是否显示年份, 默认为显示 （true）
                         showMonth: true,  //是否显示月份, 默认为显示 （true）
                         showDate: true,   //是否显示日, 默认为显示 （true）
+                        showTime: false,     //是否组件为时间选择，true：'16:20:25' 如果isCN为true，则："16时20分25秒".这个开启建议将isCN设置为false
                         complate: function(evt){  // "完成"按钮触发事件
                             console.log(this)
                             console.log(this.getCurrentDate(0,0,0));
@@ -81,7 +82,7 @@
         var self = this;
         var options = options || {};
         //self.selectElm = $ ? $('#' + selectElm)[0] : document.getElementById(selectElm);
-        self.selectElm = selectElm;
+        self.selectElm = (typeof selectElm === 'string') ? document.getElementById(selectElm) : selectElm;
         self.htmlDom = null;
         self.appWrap = $ ? $('#APPDateField-con')[0] : document.getElementById('APPDateField-con');
 
@@ -125,7 +126,7 @@
             date: new Date().getDate(),
             hours: new Date().getHours(),
             minutes: new Date().getMinutes(),
-            secondes: new Date().getSeconds(),
+            seconds: new Date().getSeconds(),
 
             upYear: options.upYear || 100,
             downYear: options.downYear || 100,
@@ -137,6 +138,7 @@
             showYear: (!options.showYear && undefined != options.showYear) ? options.showYear : true,
             showMonth: (!options.showMonth && undefined != options.showMonth) ? options.showMonth : true,
             showDate: (!options.showDate && undefined != options.showDate) ? options.showDate : true,
+            showTime: options.showTime || false, 
             commer: options.commer || '-' //日期间隔默认 ‘-’
 
         };
@@ -157,6 +159,7 @@
             value = self.selectElm.innerHTML;
         }
         if(value || value !== ''){
+            if(!self.opts.showTime) value = '';
             self.valList = self.subDefaultDate(value || '');
         }
         self.setCurrentTXT(self.valList);
@@ -250,9 +253,17 @@
         }
 
         self.loaded = true;
-        self.createYear();
-        self.createMonth();
-        self.createDate();
+        
+
+        if(self.opts.showTime){
+            self.createHours();
+            self.createMins();
+            self.createSeconds();
+        }else{
+            self.createYear();
+            self.createMonth();
+            self.createDate();
+        }
 
 
         self._events();
@@ -355,6 +366,68 @@
 
     };
 
+    /**
+     * 创建小时
+     * @return {[type]} [description]
+     */
+    APPDateField.prototype.createHours = function(){
+        var self = this;
+        var html = [];
+        var li = '';
+        var i = 0;
+        if(self.loaded){
+            while(i < 24){
+                li = self.opts.isListType ? '<li>'+ i +'时</li>' : '<li>'+ self.dateFm(i) +'</li>';
+                html.push(li);
+                i++;
+            }
+            self.app_y_con.html(html.join(''));
+        }
+        //self.currentTop = self.step * (up - 3);
+        self.currentTop = self.step * ( self.opts.hours - parseInt(self.app_y_con.find('li').eq(0).text()) - 3);
+        self._scrollTop(self.app_y_con, -self.currentTop, true);
+    };
+
+    /**
+     * 创建分钟
+     * @return {[type]} [description]
+     */
+    APPDateField.prototype.createMins = function(){
+        var self = this;
+        var html = [];
+        var li = '';
+        var i = 0;
+        if(self.loaded){
+            while(i < 60){
+                li = self.opts.isListType ? '<li>'+ i +'分</li>' : '<li>'+ self.dateFm(i) +'</li>';
+                html.push(li);
+                i++;
+            }
+            self.app_m_con.html(html.join(''));
+        }
+        self._scrollTop(self.app_m_con, -(self.step * parseInt(self.opts.minutes + 1) - (self.step * 4)), true);
+    };
+
+    /**
+     * 创建秒
+     * @return {[type]} [description]
+     */
+    APPDateField.prototype.createSeconds = function(){
+        var self = this;
+        var html = [];
+        var li = '';
+        var i = 0;
+        if(self.loaded){
+            while(i < 60){
+                li = self.opts.isListType ? '<li>'+ i +'秒</li>' : '<li>'+ self.dateFm(i) +'</li>';
+                html.push(li);
+                i++;
+            }
+            self.app_d_con.html(html.join(''));
+        }
+        self._scrollTop(self.app_d_con, -(self.step * parseInt(self.opts.seconds + 1) - (self.step * 4)), true);
+    };
+
     //setter AND getter 设置和获取函数
     APPDateField.prototype.getYear = function(){
         this.year = parseInt(this.getCurrentTXT(this.app_y_con));
@@ -405,38 +478,49 @@
         var self = this;
         var vlist = valList;
         if(vlist && vlist.length > 0){
-            if(!self.opts.showYear){
-                vlist[0] = '';
+            if(self.opts.showTime){
+                self.opts.hours = isNaN(parseInt(vlist[0])) ? self.opts.hours : parseInt(vlist[0]);
+                self.opts.minutes = isNaN(parseInt(vlist[1])) ? self.opts.minutes : parseInt(vlist[1]);
+                self.opts.seconds = isNaN(parseInt(vlist[2])) ? self.opts.seconds : parseInt(vlist[2]);
+            }else{
+                if(!self.opts.showYear){
+                    vlist[0] = '';
+                }
+                if(!self.opts.showDate){
+                    vlist[2] = '';
+                }
+                self.opts.year = isNaN(parseInt(vlist[0])) ? self.opts.year : parseInt(vlist[0]);
+                self.opts.month = isNaN(parseInt(vlist[1])) ? self.opts.month : parseInt(vlist[1]);
+                self.opts.date = isNaN(parseInt(vlist[2])) ? self.opts.date : parseInt(vlist[2]);
             }
-            if(!self.opts.showDate){
-                vlist[2] = '';
-            }
-            self.opts.year = isNaN(parseInt(vlist[0])) ? self.opts.year : parseInt(vlist[0]);
-            self.opts.month = isNaN(parseInt(vlist[1])) ? self.opts.month : parseInt(vlist[1]);
-            self.opts.date = isNaN(parseInt(vlist[2])) ? self.opts.date : parseInt(vlist[2]);
         }
 
         //console.log(vlist);
 
-        var dateStr;
-        var dy = self.opts.isCN ? (self.opts.year + '年') : (self.opts.year + self.opts.commer),
-            dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month) + self.opts.commer),
-            dd = self.opts.isCN ? (self.opts.date + '日') : (self.dateFm(self.opts.date));
-
-        if(self.opts.showYear && self.opts.showMonth && !self.opts.showDate){
-            dy = self.opts.isCN ? (self.opts.year + '年') : (self.opts.year + self.opts.commer);
-            dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month));
-            dd = '';
-            dateStr = dy + dm;
-        }else if(!self.opts.showYear && self.opts.showMonth && self.opts.showDate){
-            dy = '';
-            dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month) + self.opts.commer);
-            dd = self.opts.isCN ? (self.opts.date + '日') : (self.dateFm(self.opts.date));
-            dateStr = dm + dd;
+        var dateStr, dy, dm, dd;
+        if(self.opts.showTime){
+            dy = self.opts.isCN ? (self.opts.hours + '时') : (self.opts.hours + ':'),
+            dm = self.opts.isCN ? (self.opts.minutes + '分') : (self.dateFm(self.opts.minutes) + ':'),
+            dd = self.opts.isCN ? (self.opts.seconds + '秒') : (self.dateFm(self.opts.seconds));
+            dateStr = dy + dm + dd; 
         }else{
-            dateStr = dy + dm + dd;
+            dy = self.opts.isCN ? (self.opts.year + '年') : (self.opts.year + self.opts.commer),
+            dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month) + self.opts.commer),
+            dd = self.opts.isCN ? (self.opts.date + '日') : (self.dateFm(self.opts.date)); 
+            if(self.opts.showYear && self.opts.showMonth && !self.opts.showDate){
+                dy = self.opts.isCN ? (self.opts.year + '年') : (self.opts.year + self.opts.commer);
+                dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month));
+                dd = '';
+                dateStr = dy + dm;
+            }else if(!self.opts.showYear && self.opts.showMonth && self.opts.showDate){
+                dy = '';
+                dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month) + self.opts.commer);
+                dd = self.opts.isCN ? (self.opts.date + '日') : (self.dateFm(self.opts.date));
+                dateStr = dm + dd;
+            }else{
+                dateStr = dy + dm + dd;
+            }
         }
-
         if(self.selectElm.tagName == 'INPUT'){
             self.selectElm.value = dateStr;
         }else{
@@ -461,14 +545,21 @@
         var self = this, list = [];
         if(!dateString && dateString == ''){
             var date = new Date();
-            list.push(date.getFullYear());
-            list.push(date.getMonth() + 1);
-            list.push(date.getDate());
+            if(self.opts.showTime){
+                list.push(date.getHours());
+                list.push(date.getMinutes());
+                list.push(date.getSeconds()); 
+            }else{
+                list.push(date.getFullYear());
+                list.push(date.getMonth() + 1);
+                list.push(date.getDate()); 
+            }
+            
         }else{
             if(self.opts.isCN){
                 list = dateString.match(/(\d)+/gi);
             }else{
-                list = dateString.split(self.opts.commer || '-');
+                list = dateString.match(/(\d)+/gi) || dateString.split(self.opts.commer || '-');
             }
         }
         if(list.length == 3){
@@ -486,8 +577,7 @@
                 list.push('');
             }
         }
-
-
+        console.log(list)
         self.valList = list;
         return list;
     };
