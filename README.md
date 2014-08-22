@@ -36,5 +36,5 @@
 
 <div class="preview">
 	<img src="images/preview.png" height="1136" width="640" alt="">
-	<img src="images/preview2.png" height="1136" width="640" alt="">
+	<img src="images/previewTime.png" height="666" width="475">
 </div>
