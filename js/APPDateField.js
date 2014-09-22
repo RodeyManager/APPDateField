@@ -748,7 +748,7 @@
             width: $(this.elmParent).width(),
             height: $(this.elmParent).height()
         };
-        this.startTime = Date.now || function getTime(){ return new Date().getTime(); };
+        this.startTime = Date.now() || (function getTime(){ return new Date().getTime(); })();
 
         //触发时间侦听
         this._initEvent(elmObj);
@@ -803,7 +803,7 @@
             this.h = $(this.elm).height();
             this.startY = this.top;
             this.moveY = evt.pageY; //开始位置
-            this.startTime = Date.now || function getTime(){ return new Date().getTime(); };
+            this.startTime = Date.now() || (function getTime(){ return new Date().getTime(); })();
             //console.log('this.h = ' + this.h)
         },
         _move: function(evt, parentE){
