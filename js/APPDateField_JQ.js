@@ -1,7 +1,6 @@
 /**
  * Created with JetBrains WebStorm.
- * User: LUOYONG （Rodey -- www.senuu.com）
- * Date: 14-4-1
+ * User: Rodey
  * Time: 下午5:40
  * To change this template use File | Settings | File Templates.
  */
@@ -18,12 +17,10 @@
  *
  * var appDateField = new APPDateField('date', {
                         isCN: true,       //是否显示中文, 如: " 2014年4月1日 ", 否： " 2014-04-01 "
-                        isListType: true, //日期列表中是否需要显示 ‘年月日’
                         commer: '/',      //期间之间的间隔符, 默认为 "/"，当 isCN为 true时, 这个设置失效
                         showYear: true,   //是否显示年份, 默认为显示 （true）
                         showMonth: true,  //是否显示月份, 默认为显示 （true）
                         showDate: true,   //是否显示日, 默认为显示 （true）
-                        showTime: false,     //是否组件为时间选择，true：'16:20:25' 如果isCN为true，则："16时20分25秒".这个开启建议将isCN设置为false
                         complate: function(evt){  // "完成"按钮触发事件
                             console.log(this)
                             console.log(this.getCurrentDate(0,0,0));
@@ -41,26 +38,15 @@
 
     'use strict';
 
-
-    var rAF = window.requestAnimationFrame	||
-        window.webkitRequestAnimationFrame	||
-        window.mozRequestAnimationFrame		||
-        window.oRequestAnimationFrame		||
-        window.msRequestAnimationFrame		||
-        function (callback) { window.setTimeout(callback, 1000 / 60); };
-
-
     var root = this;
-    var ddCache = [];
     var gVars = {
-        fontSize: 22,
+        fontSize: 1.2,
         step: 40,
         isCircle: false,
         //模板
         tpl: '<div class="app-dateField-main">'+
                 '<div class="app-dateField-top">'+
                     '<span class="app-dateField-btnCancel">取消</span>'+
-                    '<span class="app-dateField-title">选择时间</span>'+
                     '<span class="app-dateField-btnOk">完成</span>'+
                 '</div>'+
                 '<div class="app-dateField-center">'+
@@ -81,8 +67,7 @@
     var APPDateField = function(selectElm, options, complate, cancel){
         var self = this;
         var options = options || {};
-        //self.selectElm = $ ? $('#' + selectElm)[0] : document.getElementById(selectElm);
-        self.selectElm = (typeof selectElm === 'string') ? document.getElementById(selectElm) : selectElm;
+        self.selectElm = $ ? $('#' + selectElm)[0] : document.getElementById(selectElm);
         self.htmlDom = null;
         self.appWrap = $ ? $('#APPDateField-con')[0] : document.getElementById('APPDateField-con');
 
@@ -126,27 +111,22 @@
             date: new Date().getDate(),
             hours: new Date().getHours(),
             minutes: new Date().getMinutes(),
-            seconds: new Date().getSeconds(),
+            secondes: new Date().getSeconds(),
 
-            upYear: options.upYear || 60,
-            downYear: 'number' === typeof options.downYear ? options.downYear : 60,
+            upYear: options.upYear || 100,
+            downYear: options.downYear || 100,
 
             isCN: (!options.isCN && undefined != options.isCN) ? options.isCN : true,
-            isListType: (!options.isListType && undefined != options.isListType) ? options.isCN : true,
             isVal: (!options.isVal && undefined != options.isVal) ? options.isVal : false, //是否是value值还是innerText
             isCircle: (!options.isCircle && undefined != options.isCircle) ? options.isCircle : false, //是否设置凸镜效果
             showYear: (!options.showYear && undefined != options.showYear) ? options.showYear : true,
             showMonth: (!options.showMonth && undefined != options.showMonth) ? options.showMonth : true,
             showDate: (!options.showDate && undefined != options.showDate) ? options.showDate : true,
-            showTime: options.showTime || false, 
             commer: options.commer || '-' //日期间隔默认 ‘-’
 
         };
 
         gVars.isCircle = self.opts.isCircle;
-        if(self.opts.step){
-            gVars.step = self.opts.step;
-        }
 
         //初始化
         self._init();
@@ -155,15 +135,9 @@
 
     APPDateField.prototype._init = function(){
         var self = this;
-        var value = '';
-        if(self.selectElm.tagName == 'INPUT'){
-            value = self.selectElm.value;
-        }else{
-            value = self.selectElm.innerHTML;
-        }
-        if(value || value !== ''){
-            //if(!self.opts.showTime) value = '';
-            self.valList = self.subDefaultDate(value || '');
+
+        if(self.selectElm.value || self.selectElm.value !== ''){
+            self.valList = self.subDefaultDate(self.selectElm.value || '');
         }
         self.setCurrentTXT(self.valList);
 
@@ -175,7 +149,7 @@
             //加入到页面中
             document.body.appendChild(self.appWrap);
         }else{
-            $ ? ($(self.appWrap).fadeIn(0)) : (self.appWrap.style.display = 'block');
+            $ ? ($(self.appWrap).show()) : (self.appWrap.style.display = 'block');
             self.isRender = true;
         }
         //加载模板
@@ -184,14 +158,15 @@
 
     APPDateField.prototype._load = function(){
         var self = this;
-        self._render();
+        if(!self.loaded) {
+            self._render();
+        }
     };
 
     APPDateField.prototype._render = function(){
         var self = this;
         var appWrap = $(self.appWrap).html(gVars.tpl);
-
-
+        var htmlDomS = appWrap;
         self.htmlDom = appWrap;
         self.app_main = appWrap.find('.app-dateField-main');
         self.app_top = appWrap.find('.app-dateField-top');
@@ -203,37 +178,32 @@
         self.app_d_con = appWrap.find('.app-dateField-date-con');
         self.app_cen_c = appWrap.find('.app-center-current');
 
-        //改变大小
-        self.app_center_con.find('ul').css({ 'width': appWrap.width() / 3 });
+        window.onresize = resize;
+        resize();
 
-        if(self.opts.showYear && self.opts.showMonth && !self.opts.showDate){
-            self.app_center_con.find('ul').css({ 'width': appWrap.width() / 2 });
-            self.app_y_con.css({ left: 0 });
-            self.app_m_con.css({ left: appWrap.width() / 2 });
-            self.app_d_con.css({ left: appWrap.width() / 2 * 2, display: 'none' });
-        }else if(!self.opts.showYear && self.opts.showMonth && self.opts.showDate){
-            self.app_center_con.find('ul').css({ 'width': appWrap.width() / 2 });
-            self.app_y_con.css({ left: 0, display: 'none' });
-            self.app_m_con.css({ left: 0 });
-            self.app_d_con.css({ left: appWrap.width() / 2 });
-        }else if(self.opts.showYear && self.opts.showMonth && self.opts.showDate){
-            self.app_y_con.css({ left: 0 });
-            self.app_m_con.css({ left: appWrap.width() / 3 });
-            self.app_d_con.css({ left: appWrap.width() / 3 * 2 });
+        function resize(){
+            self.app_center_con.find('ul').css({ 'width': appWrap.width() / 3 });
+            if(self.opts.showYear && self.opts.showMonth && !self.opts.showDate){
+                self.app_center_con.find('ul').css({ 'width': appWrap.width() / 2 });
+                self.app_y_con.css({ left: 0 });
+                self.app_m_con.css({ left: appWrap.width() / 2 });
+                self.app_d_con.css({ left: appWrap.width() / 2 * 2, display: 'none' });
+            }else if(!self.opts.showYear && self.opts.showMonth && self.opts.showDate){
+                self.app_center_con.find('ul').css({ 'width': appWrap.width() / 2 });
+                self.app_y_con.css({ left: 0, display: 'none' });
+                self.app_m_con.css({ left: 0 });
+                self.app_d_con.css({ left: appWrap.width() / 2 });
+            }else if(self.opts.showYear && self.opts.showMonth && self.opts.showDate){
+                self.app_y_con.css({ left: 0 });
+                self.app_m_con.css({ left: appWrap.width() / 3 });
+                self.app_d_con.css({ left: appWrap.width() / 3 * 2 });
+            }
         }
 
         self.loaded = true;
-        
-
-        if(self.opts.showTime){
-            self.createHours();
-            self.createMins();
-            self.createSeconds();
-        }else{
-            self.createYear();
-            self.createMonth();
-            self.createDate();
-        }
+        self.createYear();
+        self.createMonth();
+        self.createDate();
 
 
         self._events();
@@ -256,11 +226,11 @@
         var style = '';
         if(self.loaded){
             for(var j = 1; j < up + 1; j++){
-                li = self.opts.isListType ? '<li'+ style +'>'+ (ny - j) +'年</li>' : '<li>'+ (ny - j) +'</li>';
+                li = self.opts.isCN ? '<li'+ style +'>'+ (ny - j) +'年</li>' : '<li>'+ (ny - j) +'</li>';
                 html.unshift(li);
             }
             for(var i = 0; i <= down; i++){
-                li = self.opts.isListType ? '<li'+ style +'>'+ (ny + i) +'年</li>' : '<li>'+ self.dateFm((ny + i)) +'</li>';
+                li = self.opts.isCN ? '<li'+ style +'>'+ (ny + i) +'年</li>' : '<li>'+ self.dateFm((ny + i)) +'</li>';
                 html.push(li);
             }
             self.app_y_con.html(html.join(''));
@@ -284,13 +254,13 @@
         var li = '';
         if(self.loaded){
             while(m < 13){
-                li = self.opts.isListType ? '<li>'+ m +'月</li>' : '<li>'+ self.dateFm(m) +'</li>';
+                li = self.opts.isCN ? '<li>'+ m +'月</li>' : '<li>'+ self.dateFm(m) +'</li>';
                 html.push(li);
                 m++;
             }
             self.app_m_con.html(html.join(''));
         }
-        self._scrollTop(self.app_m_con, -(self.step * parseInt(self.opts.month) - (self.step * 4)), true);
+        self._scrollTop(self.app_m_con, -(self.step * parseInt(self.opts.month) - self.step * 4), true);
     };
 
     /**
@@ -313,16 +283,16 @@
                 pr = (((self.opts.year % 4 == 0 ) && (self.opts.year % 100 != 0)) || (self.opts.year % 400 == 0 )) ? 29 : 28;
                 while(d < 31){
                     if(d >= pr){
-                        li = self.opts.isListType ? '<li style="display:none;">'+ (d + 1) +'日</li>' : '<li style="display:none;">'+ self.dateFm((d + 1)) +'</li>';
+                        li = self.opts.isCN ? '<li style="display:none;">'+ (d + 1) +'日</li>' : '<li style="display:none;">'+ self.dateFm((d + 1)) +'</li>';
                     }else{
-                        li = self.opts.isListType ? '<li>'+ (d + 1) +'日</li>' : '<li>'+ self.dateFm((d + 1)) +'</li>';
+                        li = self.opts.isCN ? '<li>'+ (d + 1) +'日</li>' : '<li>'+ self.dateFm((d + 1)) +'</li>';
                     }
                     html.push(li);
                     d++;
                 }
             }else{
                 while(d < 31){
-                    li = self.opts.isListType ? '<li>'+ (d + 1) +'日</li>' : '<li>'+ self.dateFm((d + 1)) +'</li>';
+                    li = self.opts.isCN ? '<li>'+ (d + 1) +'日</li>' : '<li>'+ self.dateFm((d + 1)) +'</li>';
                     html.push(li);
                     d++;
                 }
@@ -330,72 +300,10 @@
             self.app_d_con.html(html.join(''));
         }
         //var trh =  (parseInt(self.opts.date) * 50) <= 200 ? ''+ (200 - parseInt(self.opts.date) * 50) : ''+ (parseInt(self.opts.date) * 50 - 200);
-        self._scrollTop(self.app_d_con, -(self.step * parseInt(self.opts.date) - (self.step * 4)), true);
+        self._scrollTop(self.app_d_con, -(self.step * parseInt(self.opts.date) - self.step * 4), true);
 
         //console.log(self.valList)
 
-    };
-
-    /**
-     * 创建小时
-     * @return {[type]} [description]
-     */
-    APPDateField.prototype.createHours = function(){
-        var self = this;
-        var html = [];
-        var li = '';
-        var i = 0;
-        if(self.loaded){
-            while(i < 24){
-                li = self.opts.isListType ? '<li>'+ i +'时</li>' : '<li>'+ self.dateFm(i) +'</li>';
-                html.push(li);
-                i++;
-            }
-            self.app_y_con.html(html.join(''));
-        }
-        //self.currentTop = self.step * (up - 3);
-        self.currentTop = self.step * ( self.opts.hours - parseInt(self.app_y_con.find('li').eq(0).text()) - 3);
-        self._scrollTop(self.app_y_con, -self.currentTop, true);
-    };
-
-    /**
-     * 创建分钟
-     * @return {[type]} [description]
-     */
-    APPDateField.prototype.createMins = function(){
-        var self = this;
-        var html = [];
-        var li = '';
-        var i = 0;
-        if(self.loaded){
-            while(i < 60){
-                li = self.opts.isListType ? '<li>'+ i +'分</li>' : '<li>'+ self.dateFm(i) +'</li>';
-                html.push(li);
-                i++;
-            }
-            self.app_m_con.html(html.join(''));
-        }
-        self._scrollTop(self.app_m_con, -(self.step * parseInt(self.opts.minutes + 1) - (self.step * 4)), true);
-    };
-
-    /**
-     * 创建秒
-     * @return {[type]} [description]
-     */
-    APPDateField.prototype.createSeconds = function(){
-        var self = this;
-        var html = [];
-        var li = '';
-        var i = 0;
-        if(self.loaded){
-            while(i < 60){
-                li = self.opts.isListType ? '<li>'+ i +'秒</li>' : '<li>'+ self.dateFm(i) +'</li>';
-                html.push(li);
-                i++;
-            }
-            self.app_d_con.html(html.join(''));
-        }
-        self._scrollTop(self.app_d_con, -(self.step * parseInt(self.opts.seconds + 1) - (self.step * 4)), true);
     };
 
     //setter AND getter 设置和获取函数
@@ -431,7 +339,7 @@
         if(num == 0){
             num = 3;
         }else if(num >=1 && num <= 3){
-            if(num == 1) num = 2;
+            if(num == 1) num = 2
             else if(num == 2) num = 1;
             else if(num == 3) num = 0;
         }else if(num < 0){
@@ -446,57 +354,47 @@
      */
     APPDateField.prototype.setCurrentTXT = function(valList){
         var self = this;
-        var vlist = valList, opts = self.opts;
+        var vlist = valList;
         if(vlist && vlist.length > 0){
-            if(opts.showTime){
-                opts.hours = isNaN(parseInt(vlist[0])) ? opts.hours : parseInt(vlist[0]);
-                opts.minutes = isNaN(parseInt(vlist[1])) ? opts.minutes : parseInt(vlist[1]);
-                opts.seconds = isNaN(parseInt(vlist[2])) ? opts.seconds : parseInt(vlist[2]);
-            }else{
-                if(!opts.showYear){
-                    vlist[0] = '';
-                }
-                if(!opts.showDate){
-                    vlist[2] = '';
-                }
-                opts.year = isNaN(parseInt(vlist[0])) ? opts.year : parseInt(vlist[0]);
-                opts.month = isNaN(parseInt(vlist[1])) ? opts.month : parseInt(vlist[1]);
-                opts.date = isNaN(parseInt(vlist[2])) ? opts.date : parseInt(vlist[2]);
+            if(!self.opts.showYear){
+                vlist[0] = '';
             }
+            if(!self.opts.showDate){
+                vlist[2] = '';
+            }
+            self.opts.year = isNaN(parseInt(vlist[0])) ? self.opts.year : parseInt(vlist[0]);
+            self.opts.month = isNaN(parseInt(vlist[1])) ? self.opts.month : parseInt(vlist[1]);
+            self.opts.date = isNaN(parseInt(vlist[2])) ? self.opts.date : parseInt(vlist[2]);
         }
 
         //console.log(vlist);
 
-        var dateStr, dy, dm, dd;
-        if(opts.showTime){
-            dy = opts.isCN ? (opts.hours + '时') : (opts.hours + ':'),
-            dm = opts.isCN ? (opts.minutes + '分') : (self.dateFm(opts.minutes) + ':'),
-            dd = opts.isCN ? (opts.seconds + '秒') : (self.dateFm(opts.seconds));
-            dateStr = dy + dm + dd; 
+        var dy = self.opts.isCN ? (self.opts.year + '年') : (self.opts.year + self.opts.commer),
+            dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month) + self.opts.commer),
+            dd = self.opts.isCN ? (self.opts.date + '日') : (self.dateFm(self.opts.date));
+
+        if(self.opts.showYear && self.opts.showMonth && !self.opts.showDate){
+            dy = self.opts.isCN ? (self.opts.year + '年') : (self.opts.year + self.opts.commer);
+            dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month) + self.opts.commer);
+            dd = '';
+            self.selectElm.value = dy + dm;
+        }else if(!self.opts.showYear && self.opts.showMonth && self.opts.showDate){
+            dy = '';
+            dm = self.opts.isCN ? (self.opts.month + '月') : (self.dateFm(self.opts.month) + self.opts.commer);
+            dd = self.opts.isCN ? (self.opts.date + '日') : (self.dateFm(self.opts.date));
+            self.selectElm.value = dm + dd;
         }else{
-            dy = opts.isCN ? (opts.year + '年') : (opts.year + opts.commer),
-            dm = opts.isCN ? (opts.month + '月') : (self.dateFm(opts.month) + opts.commer),
-            dd = opts.isCN ? (opts.date + '日') : (self.dateFm(opts.date));
-            if(opts.showYear && opts.showMonth && !opts.showDate){
-                dy = opts.isCN ? (opts.year + '年') : (opts.year + opts.commer);
-                dm = opts.isCN ? (opts.month + '月') : (self.dateFm(opts.month));
-                dd = '';
-                dateStr = dy + dm;
-            }else if(!opts.showYear && opts.showMonth && opts.showDate){
-                dy = '';
-                dm = opts.isCN ? (opts.month + '月') : (self.dateFm(opts.month) + opts.commer);
-                dd = opts.isCN ? (opts.date + '日') : (self.dateFm(opts.date));
-                dateStr = dm + dd;
-            }else{
-                dateStr = dy + dm + dd;
-            }
-        }
-        if(self.selectElm.tagName == 'INPUT'){
-            self.selectElm.value = dateStr;
-        }else{
-            self.selectElm.innerHTML = dateStr;
+            self.selectElm.value = dy + dm + dd;
         }
 
+
+
+
+        /*if(self.opts.isCN){
+            dateValue = self.opts.year + '年' + self.opts.month + '月' + self.opts.date + '日';
+        }else{
+            dateValue = self.opts.year + self.opts.commer + self.dateFm(self.opts.month) + self.opts.commer + self.dateFm(self.opts.date);
+        }*/
     };
 
     /**
@@ -506,41 +404,36 @@
      */
     APPDateField.prototype.subDefaultDate = function(dateString){
 
-        var self = this, list = [], opts = self.opts;
+        var self = this, list = [];
         if(!dateString && dateString == ''){
             var date = new Date();
-            if(opts.showTime){
-                list.push(date.getHours());
-                list.push(date.getMinutes());
-                list.push(date.getSeconds()); 
-            }else{
-                list.push(date.getFullYear());
-                list.push(date.getMonth() + 1);
-                list.push(date.getDate()); 
-            }
-            
+            list.push(date.getFullYear());
+            list.push(date.getMonth() + 1);
+            list.push(date.getDate());
         }else{
-            if(opts.isCN){
+            if(self.opts.isCN){
                 list = dateString.match(/(\d)+/gi);
             }else{
-                list = dateString.match(/(\d)+/gi) || dateString.split(opts.commer || '-');
+                list = dateString.split(self.opts.commer || '-');
             }
         }
         if(list.length == 3){
-            if(!opts.showYear){
+            if(!self.opts.showYear){
                 list[0] = '';
             }
-            if(!opts.showDate){
+            if(!self.opts.showDate){
                 list[2] = '';
             }
         }else{
-            if(!opts.showYear){
+            if(!self.opts.showYear){
                 list.unshift('');
             }
-            if(!opts.showDate){
+            if(!self.opts.showDate){
                 list.push('');
             }
         }
+
+
         self.valList = list;
         return list;
     };
@@ -573,14 +466,13 @@
      * @private
      */
     APPDateField.prototype._scrollTop = function(elObj, y, flag){
-        var self = this;
-        var flag = !flag ? flag : true,
-            step = self.step;
+       var flag = !flag ? flag : true;
         if(flag){
-            elObj.off().animate({'top': y}, 500, function(){
-                var mesc = y % step;
+            elObj.stop().animate({'top': y}, 500, function(){
+                var mesc = y % self.step;
+                //console.log(mesc)
                 if(mesc != 0){
-                    var top = step * Math.round(y / step) - ( Math.abs(mesc) < step ? 0 : step);
+                    var top = self.step * Math.round(y / self.step) - ( Math.abs(mesc) < self.step ? 0 : self.step);
                     $(this).animate({ top: top });
                 }
             });
@@ -597,16 +489,14 @@
      * @private
      */
     APPDateField.prototype._events = function(){
-        var self = this,
-            opts = self.opts,
-            app_y_con = self.app_y_con,
-            app_m_con = self.app_m_con,
-            app_d_con = self.app_d_con,
-            app_main = self.app_main;
-
-        var appYCON_touch = new APPTouch(app_y_con[0], app_main[0], opts);
-        var appMCON_touch = new APPTouch(app_m_con[0], app_main[0], opts);
-        var appDCON_touch = new APPTouch(app_d_con[0], app_main[0], opts);
+        var self = this;
+        var app_y_con = self.app_y_con;
+        var app_m_con = self.app_m_con;
+        var app_d_con = self.app_d_con;
+        var app_main = self.app_main;
+        var appYCON_touch = new APPTouch(app_y_con[0], app_main[0], self.opts);
+        var appMCON_touch = new APPTouch(app_m_con[0], app_main[0], self.opts);
+        var appDCON_touch = new APPTouch(app_d_con[0], app_main[0], self.opts);
 
         //完成和取消按钮
         self.app_btnOk.bind('touchend', holdEvent(self, self._complate));
@@ -639,7 +529,7 @@
 
         this.currDate = vlist;
         //console.log(this.currDate)
-        //负值给选择框
+
         this.setCurrentTXT(vlist);
 
         this.appWrap.style.display = 'none';
@@ -661,9 +551,6 @@
     APPDateField.prototype.dateFm = function(n){
         return (n < 10) ? '0' + n : n;
     };
-    
-
-    root.APPDateField = APPDateField;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////以下是滚动对象///////////////////////////////////////////////////////////////////////////////////////
@@ -714,7 +601,7 @@
             width: $(this.elmParent).width(),
             height: $(this.elmParent).height()
         };
-        this.startTime = Date.now() || (function getTime(){ return new Date().getTime(); })();
+        this.startTime = Date.now || function getTime(){ return new Date().getTime(); };
 
         //触发时间侦听
         this._initEvent(elmObj);
@@ -769,13 +656,13 @@
             this.h = $(this.elm).height();
             this.startY = this.top;
             this.moveY = evt.pageY; //开始位置
-            this.startTime = Date.now() || (function getTime(){ return new Date().getTime(); })();
+            this.startTime = Date.now || function getTime(){ return new Date().getTime(); };
             //console.log('this.h = ' + this.h)
         },
         _move: function(evt, parentE){
             if(this.isTouchStart){
                 var target = $(evt.target).parent('ul');
-                target.find('li').css('fontSize', this.fontSize + 'px');
+                target.find('li').css('fontSize', this.fontSize + 'em');
                 this.dy = this.y - (this.moveY - evt.pageY);
 
                 var top = this._formateTop(this.dy);
@@ -799,7 +686,6 @@
             }
 
             var top = this._formateTop(curTop);
-            //console.log(curTop)
             this._scrollTop(target[0], top, false);
 
             //设置凸镜效果
@@ -812,10 +698,10 @@
          * @private
          */
         _formateTop: function(top){
-            if(top >= (gVars.step * 3)){
-                top = (gVars.step * 3);
-            }else if(Math.abs(top) >= this.h - (gVars.step * 4)){
-                top = -(this.h - (gVars.step * 4));
+            if(top >= this.step * 3){
+                top = this.step * 3;
+            }else if(Math.abs(top) >= this.h - this.step * 4){
+                top = -(this.h - this.step * 4);
             }else{
                 return top;
             }
@@ -837,11 +723,11 @@
             if(flag){
                 el.style.top = y + 'px';
             }else{
-                $(el).off().animate({ top: y }, 10, function(){
-                    var mesc = y % gVars.step;
+                $(el).stop().animate({ top: y }, 10, function(){
+                    var mesc = y % self.step;
                     //console.log(mesc)
                     if(mesc != 0){
-                        var top = gVars.step * Math.round(y / gVars.step) - ( Math.abs(mesc) < gVars.step ? 0 : gVars.step);
+                        var top = self.step * Math.round(y / self.step) - ( Math.abs(mesc) < self.step ? 0 : self.step);
                         $(this).animate({ top: top });
                         self.y = top;
                     }
@@ -851,21 +737,30 @@
 
             /////获取滚动end后的焦点值==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-START
             if(!self.isTouchStart){
-                var num = supperNumber(Math.round($(el).position().top / gVars.step));
+                var num = supperNumber(Math.round($(el).position().top / 50));
+                /*if(num == 0){
+                    num = 3;
+                }else if(num >=1 && num <= 3){
+                    if(num == 1) num = 2
+                    else if(num == 2) num = 1;
+                    else if(num == 3) num = 0;
+                }else{
+                    num = Math.abs(num) + 3;
+                }*/
                 var txt = $(el).find('li').eq(num).text();
                 if($(el).hasClass('app-dateField-month-con')){
                     self.vlist.month = parseInt(txt);
-                    var ynum = supperNumber(Math.round($('.app-dateField-year-con').position().top / gVars.step));
+                    var ynum = supperNumber(Math.round($('.app-dateField-year-con').position().top / self.step));
                     self.vlist.year = parseInt($('.app-dateField-year-con').find('li').eq(ynum).text());
                 }else if($(el).hasClass('app-dateField-year-con')){
                     self.vlist.year = parseInt(txt);
-                    var ynum = supperNumber(Math.round($('.app-dateField-month-con').position().top / gVars.step));
+                    var ynum = supperNumber(Math.round($('.app-dateField-month-con').position().top / self.step));
                     self.vlist.month = parseInt($('.app-dateField-month-con').find('li').eq(ynum).text());
                 }else{
                     self.vlist.date = parseInt(txt);
-                    var ynum = supperNumber(Math.round($('.app-dateField-year-con').position().top / gVars.step));
+                    var ynum = supperNumber(Math.round($('.app-dateField-year-con').position().top / self.step));
                     self.vlist.year = parseInt($('.app-dateField-year-con').find('li').eq(ynum).text());
-                    var mnum = supperNumber(Math.round($('.app-dateField-month-con').position().top / gVars.step));
+                    var mnum = supperNumber(Math.round($('.app-dateField-month-con').position().top / self.step));
                     self.vlist.month = parseInt($('.app-dateField-month-con').find('li').eq(mnum).text());
                 }
 
@@ -960,17 +855,18 @@
             index = Math.abs(index) + 3;
         }
 
-        //console.log(self.step)
-
         //循环缩放 上
         for(var i = 0; i < 4; i++){
             var li = elObj.find('li').eq(index - i);
             if(li[0]){
-                li[0].style.fontSize = dd + 'px';
+                li[0].style.fontSize = dd + 'em';
+                //li.stop().css({ 'font-size': dd }, 1);
+                //li[0].innerText = somer + li[0].innerText;
             }else{
-                continue;
+                break;
             }
-            dd -= 3.0;
+            //somer = somer + "  ";
+            dd -= .3;
         }
         dd = gVars.fontSize;
 
@@ -979,14 +875,21 @@
         for(var j = 0; j < 4; j++){
             var li = elObj.find('li').eq(index + j);
             if(li[0]){
-                li[0].style.fontSize = dd + 'px';
+                li[0].style.fontSize = dd + 'em';
+                //li.stop().css({ 'font-size': dd }, 1);
+                //li[0].innerText = somer + li[0].innerText;
             }else{
-                continue;
+                break;
             }
-            dd -= 3.0;
+            //somer = somer + "  ";
+            dd -= .3;
         }
 
     };
+
+    "function" == typeof define ? define(function() {
+        return APPDateField;
+    }) : "undefined" != typeof exports ? module.exports = APPDateField : window.APPDateField = APPDateField;
 
 }).call(this);
 
