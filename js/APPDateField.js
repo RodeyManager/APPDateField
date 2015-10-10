@@ -41,21 +41,12 @@
 
     'use strict';
 
-
-    var rAF = window.requestAnimationFrame	||
-        window.webkitRequestAnimationFrame	||
-        window.mozRequestAnimationFrame		||
-        window.oRequestAnimationFrame		||
-        window.msRequestAnimationFrame		||
-        function (callback) { window.setTimeout(callback, 1000 / 60); };
-
-
     var root = this;
     var ddCache = [];
     var gVars = {
         fontSize: 22,
         step: 40,
-        isCircle: false,
+        isCircle: true,
         //模板
         tpl: '<div class="app-dateField-main">'+
                 '<div class="app-dateField-top">'+
@@ -134,7 +125,7 @@
             isCN: (!options.isCN && undefined != options.isCN) ? options.isCN : true,
             isListType: (!options.isListType && undefined != options.isListType) ? options.isCN : true,
             isVal: (!options.isVal && undefined != options.isVal) ? options.isVal : false, //是否是value值还是innerText
-            isCircle: (!options.isCircle && undefined != options.isCircle) ? options.isCircle : false, //是否设置凸镜效果
+            isCircle: (!options.isCircle && undefined != options.isCircle) ? options.isCircle : true, //是否设置凸镜效果
             showYear: (!options.showYear && undefined != options.showYear) ? options.showYear : true,
             showMonth: (!options.showMonth && undefined != options.showMonth) ? options.showMonth : true,
             showDate: (!options.showDate && undefined != options.showDate) ? options.showDate : true,
@@ -588,7 +579,7 @@
             elObj[0].style.top = y + 'px';
         }
         //设置凸镜效果
-        zoomOBJ(elObj, y);
+        (gVars.isCircle === true) && zoomOBJ(elObj, y);
 
     };
 
@@ -782,7 +773,7 @@
                 this._scrollTop(target[0], top, true);
 
                 //设置凸镜效果
-                zoomOBJ(target, top);
+                (gVars.isCircle === true) && zoomOBJ(target, top);
             }
         },
         _end: function(evt, parentE){
@@ -803,7 +794,7 @@
             this._scrollTop(target[0], top, false);
 
             //设置凸镜效果
-            zoomOBJ(target, top);
+            (gVars.isCircle === true) && zoomOBJ(target, top);
         },
         /**
          * 判断高度越界
