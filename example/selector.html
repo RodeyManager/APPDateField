@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>数据选择组件</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+    <meta content="name" charset="Rodey">
+    <meta content="keyword" charset=" ">
+    <meta content="descriptions" charset=" ">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-status-bar-style" content="black-translucent">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+    <meta name="format-detection" content="telephone=no"/>
+
+    <link rel="stylesheet" href="assets/css/app.css">
+    <link rel="stylesheet" href="../src/css/default.css">
+</head>
+<body>
+    <div id="app">
+
+        <input type="text" id="bank" readonly value="" class="date-input" placeholder="选择开户银行">
+        <input type="text" id="profession" readonly value="公务员" class="date-input" placeholder="选择职业">
+        <input type="text" id="province" readonly value="江西省" class="date-input" placeholder="选择省份">
+        <!--<input type="text" id="city" readonly value="" class="date-input" placeholder="选择市">-->
+        <!--<input type="text" id="county" readonly value="" class="date-input" placeholder="选择县">-->
+        <input type="text" id="date" readonly value="" class="date-input" placeholder="选择日期">
+        <input type="text" id="time" readonly value="" class="date-input" placeholder="选择时间">
+    </div>
+
+<!--载入js-->
+<script src="assets/js/zepto.js"></script>
+<script src="../src/APPDateField.js"></script>
+
+<script>
+
+    $(document).ready(function(){
+
+        //银行列表
+        var banks = {
+            'ICBC_C_T': '中国工商银行',
+            'CCB_C_T': '中国建设银行',
+            'ABC_C_T': '中国农业银行',
+            'BOC_C_T': '中国银行',
+            'CIB_C_T': '兴业银行',
+            'CEB_C_T': '中国光大银行',
+            'CMBC_C_T': '中国民生银行',
+            'CITIC_C_T': '中信银行',
+            'CGB_C_T': '广东发展银行',
+            'GZCB_C_T': '广州银行',
+            'CMB_C_T': '招商银行',
+            'PINGAN_C_T': '平安银行(含深发展)',
+            'GRCB_C_T': '广州农商行',
+            'SPDB_C_T': '上海浦东发展银行'
+        };
+
+        var professions = [
+            '金融业',
+            '水陆空交通运输业、邮政、水电、燃气、通讯、IT业',
+            '旅游、餐饮、零售',
+            '文体业、教育业、新闻业、卫生保健业、清洁或家政服务业',
+            '公务员',
+            '房屋中介、律师、公证人员、会计师',
+            '矿石开采业、建筑工程业、装潢业',
+            '农牧业、渔业、木材森林业',
+            '自营投资者',
+            '娱乐场所、博彩、影视娱乐业',
+            '五金电器、日用品、化工建材等制造业',
+            '艺术品收藏、拍卖、典当、贵金属和珠宝交易商',
+            '家庭主妇',
+            '离退休人员',
+            '除家庭主妇及离退休人员以外其它无固定职业人员',
+            '成年学生（18周岁及以上）',
+            '外国政要',
+            '其他'
+        ];
+
+        var provinces = [
+            '北京市','上海市', '重庆市', '天津市', '广东省', '广西省', '江西省', '湖南省', '福建省', '四川省', '安徽省', '浙江省',
+            '江苏省', '湖北省', '河北省', '河南省', '黑龙江省', '辽宁省', '吉林省', '陕西省', '山西省', '青海省', '山东省'
+        ];
+
+        var citys = ['南昌市', '九江市', '赣州市', '吉安市', '高安市', '抚州市', '景德镇', '新余市', '宜春市', '鹰潭市'];
+        var countys = ['吉安县', '吉水县', '峡江县', '新干县', '井冈山', '泰和县', '遂川县'];
+
+
+        var bankBtn = $('#bank');
+        var professionBtn = $('#profession');
+        var provinceBtn = $('#province');
+        var cityBtn = $('#city');
+        var countyBtn = $('#county');
+        var dateBtn = $('#date');
+        var timeBtn = $('#time');
+
+        var appDateField;
+
+        var choiesBank = function(evt){
+            appDateField = new APPDateField('bank', {
+                title: '选择开户银行',
+                data: banks,
+                isCircle: false,
+                fontSize: 14,
+                complete: function(){
+                    console.log(this);
+                    console.log(this.getCurrentDate());
+                    console.log(this.changeElement);
+                },
+                cancel: function(){
+                    console.log('[已取消]  Cancel----');
+                }
+            });
+        };
+
+        var choiesProfession = function(evt){
+            appDateField = new APPDateField('profession', {
+                title: '选择职业',
+                data: professions,
+                isCircle: false,
+                fontSize: 14,
+                complete: function(){
+                    console.log(this);
+                    console.log(this.getCurrentDate());
+                },
+                cancel: function(){
+                    console.log('[已取消]  Cancel----');
+                }
+            });
+        };
+
+        var choiesProvince = function(evt){
+            appDateField = new APPDateField('province', {
+                title: '请选择省份',
+                data: provinces,
+                complete: function(){
+                    console.log(this);
+                    console.log(this.getCurrentDate());
+                },
+                cancel: function(){
+                    console.log('[已取消]  Cancel----');
+                }
+            });
+        };
+
+        var choiesCity = function(evt){
+            appDateField = new APPDateField('city', {
+                title: '请选择城市',
+                data: citys,
+                complete: function(){
+                    console.log(this);
+                    console.log(this.getCurrentDate());
+                },
+                cancel: function(){
+                    console.log('[已取消]  Cancel----');
+                }
+            });
+        };
+
+        var choiesCounty = function(evt){
+            appDateField = new APPDateField('county', {
+                title: '请选择地区',
+                data: countys,
+                complete: function(){
+                    console.log(this);
+                    console.log(this.getCurrentDate());
+                },
+                cancel: function(){
+                    console.log('[已取消]  Cancel----');
+                }
+            });
+        };
+
+        var choiesDate = function(evt){
+            appDateField = new APPDateField('date', {
+                title: '请选择日期',
+                isCN: true,
+                commer: '-',        //日期之间的间隔符 , 默认为：“-” (只有在isCN为false的时候有用)
+                showTime: false,
+                complete: function(){
+                    console.log(this);
+                    console.log(this.getCurrentDate());
+                },
+                cancel: function(){
+                    console.log('[已取消]  Cancel----');
+                }
+            });
+        };
+
+        var choiesTime = function(evt){
+            appDateField = new APPDateField('time', {
+                title: 'Choose Time',
+                isCN: false,
+                showTime: true,
+                completeTxt: 'Select',
+                complete: function(){
+                    console.log(this);
+                    console.log(this.getCurrentDate());
+                },
+                cancelTxt: 'Cancel',
+                cancel: function(){
+                    console.log('[已取消]  Cancel----');
+                }
+            });
+        };
+
+        bankBtn.on('tap', choiesBank);
+        professionBtn.on('tap', choiesProfession);
+        provinceBtn.on('tap', choiesProvince);
+        cityBtn.on('tap', choiesCity);
+        countyBtn.on('tap', choiesCounty);
+        dateBtn.on('tap', choiesDate);
+        timeBtn.on('tap', choiesTime);
+
+    });
+
+</script>
+
+
+</body>
+</html>
