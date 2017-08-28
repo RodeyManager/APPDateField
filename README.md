@@ -25,11 +25,6 @@
 	});
 </pre>
 
-<style>
-    .preview img{ display: inline-block; }
-    .options li{ color: #888; }
-    .options li code{ color: #444; }
-</style>
 <div class="preview">
     <img src="example/assets/images/1.png" width="320" alt="" style="display: inline-block">
     <img src="example/assets/images/2.png" width="320" alt="" style="display: inline-block">
@@ -43,6 +38,7 @@
     <li> <code>upYear:</code> 上限年份 </li>
     <li> <code>downYear:</code> 下限年份 </li>
     <li> <code>data:</code> 选择数据，自定义数据选择，相当于select标签 </li>
+    <li> <code>defaultValue:</code>   默认值，如果data存在，必须是数组 </li>
     <li> <code>title:</code> 标题 </li>
     <li> <code>addClass:</code> 对象层需要添加的class </li>
     <li> <code>fontSize:</code> 列表字体大小 </li>
