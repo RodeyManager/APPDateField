@@ -1,2 +1,5 @@
-node_modules/.bin/gulp
 node_modules
+.idea
+*.zip
+*.rar
+readme.html

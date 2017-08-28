@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>数据选择组件</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+    <meta content="name" charset="Rodey">
+    <meta content="keyword" charset=" ">
+    <meta content="descriptions" charset=" ">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-status-bar-style" content="black-translucent">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+    <meta name="format-detection" content="telephone=no"/>
+
+    <link rel="stylesheet" href="assets/css/app.css">
+    <link rel="stylesheet" href="../src/css/default.css">
+</head>
+<body>
+    <div id="app">
+        <input type="text" id="province" readonly value="" class="date-input" placeholder="选择">
+    </div>
+
+<!--载入js-->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/fastclick.js"></script>
+<script src="../src/APPDateField.js"></script>
+
+<script>
+
+    $(document).ready(function(){
+        FastClick.attach(document.body);
+
+        var data = [
+            [ 1, 2, 3, 4, 5, 6,7,8,9,10,11,12,13,14,15 ],
+            [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'],
+            [ '日', '一', '二', '三', '四', '五', '六' ].map(function(w){ return '星期'+ w; })
+        ];
+
+        var provinceBtn = $('#province');
+
+        var appDateField;
+
+        var choiesProvince = function(evt){
+            appDateField = new APPDateField('province', {
+                title: '请选择城市',
+//                data: provinces,
+                data: data,
+                multiDataSelect: true,
+                toValues: function(v){
+                    return v.join(' - ');
+                },
+                complete: function(){
+                    console.log('target: ', this);
+                    console.log('arguments: ', arguments);
+                    console.log('select value: ', this.getCurrentDate());
+                    console.log('changed element item: ', this.changeElement);
+
+                },
+                cancel: function(){
+                    console.log('[已取消]  Cancel----');
+                }
+            });
+        };
+        provinceBtn.click(choiesProvince);
+
+    });
+
+</script>
+
+
+</body>
+</html>
