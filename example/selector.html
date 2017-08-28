@@ -28,14 +28,21 @@
     </div>
 
 <!--载入js-->
+<<<<<<< HEAD
 <script src="assets/js/jquery.min.js"></script>
 <script src="assets/js/fastclick.js"></script>
+=======
+<script src="assets/js/zepto.js"></script>
+>>>>>>> origin/master
 <script src="../src/APPDateField.js"></script>
 
 <script>
 
     $(document).ready(function(){
+<<<<<<< HEAD
         FastClick.attach(document.body);
+=======
+>>>>>>> origin/master
 
         //银行列表
         var banks = {
@@ -176,19 +183,25 @@
                 isCN: true,
                 commer: '-',        //日期之间的间隔符 , 默认为：“-” (只有在isCN为false的时候有用)
                 showTime: false,
+<<<<<<< HEAD
                 upYear: 1,
                 downYear: 10,
+=======
+>>>>>>> origin/master
                 complete: function(){
                     console.log(this);
                     console.log(this.getCurrentDate());
                 },
                 cancel: function(){
                     console.log('[已取消]  Cancel----');
+<<<<<<< HEAD
                 },
                 moveEnd: function(changeElement, wrap){
                     console.log(this);
                     console.log(changeElement);
                     console.log(wrap);
+=======
+>>>>>>> origin/master
                 }
             });
         };
@@ -210,6 +223,7 @@
             });
         };
 
+<<<<<<< HEAD
         bankBtn.click(choiesBank);
         professionBtn.click(choiesProfession);
         provinceBtn.click(choiesProvince);
@@ -217,6 +231,15 @@
         countyBtn.click(choiesCounty);
         dateBtn.click(choiesDate);
         timeBtn.click(choiesTime);
+=======
+        bankBtn.on('tap', choiesBank);
+        professionBtn.on('tap', choiesProfession);
+        provinceBtn.on('tap', choiesProvince);
+        cityBtn.on('tap', choiesCity);
+        countyBtn.on('tap', choiesCounty);
+        dateBtn.on('tap', choiesDate);
+        timeBtn.on('tap', choiesTime);
+>>>>>>> origin/master
 
     });
 

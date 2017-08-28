@@ -29,9 +29,10 @@
                 '<div class="app-s-bottom"></div>'+
         '</div>'
     };
-    function isDefiend(val){ return undefined != val; }
+    function isDefiend(val){ return undefined !== val; }
     var isFunction = function(fn){ return 'function' === typeof fn; };
     var empty = function(){};
+    function isEmpty(){}
     var toString = Object.prototype.toString;
 
     /**
@@ -54,6 +55,14 @@
         this.complete = isFunction(options.complete) ? options.complete : isFunction(complete) ? complete : empty;
         this.cancel = isFunction(options.cancel) ? options.cancel : isFunction(cancel) ? cancel : empty;
         this.moveEnd = isFunction(options.moveEnd) ? options.moveEnd : empty;
+        if((options.complete && isDefiend(options.complete) && typeof options.complete === 'function')
+            || (complete && typeof complete === 'function') ){
+            this.complete = options.complete || complete || isEmpty;
+        }
+        if((options.cancel && isDefiend(options.cancel) && typeof options.cancel === 'function')
+            || (cancel && typeof cancel === 'function') ){
+            this.cancel = options.cancel || cancel || isEmpty;
+        }
 
         this.step = gVars.step;
 
@@ -96,11 +105,9 @@
         this._init();
 
     };
-
     APPDateField.prototype.reset = function(){
         this._init();
     };
-
     APPDateField.prototype._init = function(){
         var value = this._getValue();
 
@@ -161,7 +168,6 @@
 
         //改变大小
         this._resize();
-
         this.loaded = true;
 
         if(this.opts.showTime){
@@ -179,7 +185,6 @@
 
     APPDateField.prototype._resize = function(){
         var appWrap_w = this.appWrap.width();
-
         this.app_center_con.find('ul').css('width', appWrap_w / 3);
 
         if(this.opts.showYear && this.opts.showMonth && this.opts.showDate){
@@ -197,6 +202,7 @@
             this.app_m_con.css('left', 0);
             this.app_d_con.css('left', appWrap_w / 2);
         }
+
     };
 
     APPDateField.prototype.createDatas = function(){
@@ -239,11 +245,9 @@
             }else{
                 this._createHTML(datas, this.app_y_con, 0);
             }
-
         }else{
             throw new ReferenceError('data parameter must be an array or object');
         }
-
     };
 
     APPDateField.prototype._createHTML = function(datas, el, vi){
@@ -274,7 +278,6 @@
         el.html(html.join('')).show();
         var currentTop = this.step * parseInt(index) - (this.step * 4);
         this._scrollTop(el, -currentTop, true);
-
     };
 
     /**
@@ -315,7 +318,11 @@
 
     /**
      * 创建日
+<<<<<<< HEAD
      * @param flag
+=======
+     * @param n
+>>>>>>> origin/master
      * @return {String}
      */
     APPDateField.prototype.createDate = function(flag){
@@ -534,7 +541,6 @@
     APPDateField.prototype.subDefaultDate = function(dateString){
 
         var self = this, list = [], opts = self.opts;
-
         if(!dateString){
             var date = new Date();
             if(opts.showTime){
@@ -746,11 +752,11 @@
     APPTouch.prototype = {
         _initEvent: function(element){
             if(this.hasTouch){
-                this.elmParent.addEventListener('touchstart', this, false);
+                element.addEventListener('touchstart', this, false);
                 element.addEventListener('touchmove', this, false);
                 element.addEventListener('touchend', this, false);
             }else{
-                this.elmParent.addEventListener('mousedown', this, false);
+                element.addEventListener('mousedown', this, false);
                 element.addEventListener('mousemove', this, false);
                 element.addEventListener('mouseup', this, false);
             }

@@ -31,11 +31,11 @@
     .options li code{ color: #444; }
 </style>
 <div class="preview">
-    <img src="example/assets/images/1.png" width="320" alt="">
-    <img src="example/assets/images/2.png" width="320" alt="">
-    <img src="example/assets/images/3.png" width="320" alt="">
-    <img src="example/assets/images/4.png" width="320" alt="">
-    <img src="example/assets/images/5.png" width="320" alt="">
+    <img src="example/assets/images/1.png" width="320" alt="" style="display: inline-block">
+    <img src="example/assets/images/2.png" width="320" alt="" style="display: inline-block">
+    <img src="example/assets/images/3.png" width="320" alt="" style="display: inline-block">
+    <img src="example/assets/images/4.png" width="320" alt="" style="display: inline-block">
+    <img src="example/assets/images/5.png" width="320" alt="" style="display: inline-block">
 </div>
 
 <h2>Options</h2>
